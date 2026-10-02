@@ -1,0 +1,14 @@
+name: disaster-v2
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - osmnx
+  - networkx
+  - matplotlib
+  - rasterio
+  - pip
+  - pip:
+      - torch
+      - torchvision
+prefix: /home/kuzey/miniconda3/envs/disaster-v2
