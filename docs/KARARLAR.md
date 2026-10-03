@@ -32,3 +32,18 @@ Format V1'deki (`disaster-routing/docs/Kararlar.md`) ile aynı: her karar numara
 **Gerekçe:** Kullanıcı tercihi, görsel doğrulamadan sonra netleşti. Antakya `031133023301` çifti örneği: pre=%100 ama post=%79 — pre tek başına kusursuz olsa da post'un eksik alanı değişim-tespiti (change detection) sinyalini bozar, bu yüzden çift bütün olarak elenir.
 **Ölçüm notu:** Bu eşik, `check_maxar_sehir_tiles.py`'nin bastığı "dolu alan %" ile AYNI metrik değil — o script SEÇİLEN 2048x2048 kırpma penceresini ölçer, `maxar_filter_temiz.py` TÜM karoyu ölçer (ayrıntı: script docstring'i). Filtreleme kararı tüm karo üzerinden veriliyor.
 **Sonraki adım:** `maxar_filter_temiz.py` 36 adayın tamamında çalıştırılacak, geçen alt küme `docs/maxar_temiz_ciftler.csv`'ye yazılacak, bu dosya Maxar'ın nihai kullanılabilir veri kümesi olacak.
+
+## V2-K06 — AÇIK: Maxar crop hizalama sorunu + eşik kapsamı tartışması
+
+**Tarih:** 2026-10-03
+**Durum:** Kapandı, bkz. V2-K07.
+**Bulgu:** 36 adayın tamamı tarandı (`--esik 90`), 4/36 geçti: Gaziantep (`031133102032`, `031133102033`), Kilis (`031133031132`, `031133031133`). Antakya'dan hiçbir çift geçmedi. `post` neredeyse her yerde %100 (özel görevli deprem-sonrası tarama), `pre` dağınık/düşük (arşiv görüntüsü) — darboğaz her zaman pre tarafı.
+**Ayrıca bulundu:** `check_maxar_sehir_tiles.py`'deki crop merkezi pre/post için bağımsız hesaplanıyordu — aynı quadkey'in pre ve post'u aynı piksel-koordinat sistemini paylaştığı için, bağımsız merkezler iki önizlemenin farklı coğrafi bölgeleri göstermesine yol açabiliyordu.
+
+## V2-K07 — V2-K06'nın çözümü: eşik tüm karoda kalıyor, crop ortak merkezle hizalandı
+
+**Tarih:** 2026-10-03
+**Karar 1:** Temizlik eşiği (%90, V2-K05) TÜM KARO üzerinden ölçülmeye devam ediyor, crop-bazlı metriğe geçilmedi.
+**Gerekçe:** Kullanıcı kararı. Crop-bazlı bir eşik hangi crop'un seçileceğine bağlı olduğu için kendi başına garanti sunmuyor — "kör atış", ilerletmek yerine geri götürür. Antakya'nın kaybı bu seçimin kabul edilen maliyeti.
+**Karar 2:** `check_maxar_sehir_tiles.py` v3'e güncellendi — crop merkezi artık pre/post için bağımsız değil, ikisinin veri maskesinin KESİŞİMİNDEN hesaplanan TEK ortak merkez kullanılıyor. Kesişim boşsa script crop üretmeden bunu rapor ediyor.
+**Durum:** Maxar'ın nihai kullanılabilir kümesi `docs/maxar_temiz_ciftler.csv`'deki 4 GECTI çift (Gaziantep×2, Kilis×2) — Maxar analizi burada kapanıyor, sıradaki adım KATE-CD.
