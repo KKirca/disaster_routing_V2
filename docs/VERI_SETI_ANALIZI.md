@@ -6,7 +6,7 @@ Her aday veri seti için: görsel kalitesi, etiket kalitesi, bina/hasar içeriğ
 
 ## 1. Maxar Open Data (lokal indirilen, `disaster-routing/data/maxar/` + `maxar_tiles/`)
 
-**Durum: İncelendi — mevcut haliyle işimize yaramıyor.**
+**Durum: Devam ediyor — şehir merkezi adayları bulundu, görsel doğrulama sürüyor (önizleme script'indeki kırpma hatası düzeltildi, nihai karar kullanıcı doğrulamasına bağlı).**
 
 - **Kapsam:** Kahramanmaraş-turkey-earthquake-23 event'inden 7 eşleşen pre/post çifti (quadkey: 121,123,130,131,132,133,301), her biri 2048px karolara bölünmüş (567+567 PNG).
 - **Koordinat:** Var, doğrulandı (EPSG:32637, orijinal GeoTIFF'lerde intact).
@@ -40,6 +40,25 @@ Her aday veri seti için: görsel kalitesi, etiket kalitesi, bina/hasar içeriğ
 **Kalan adım (senin tarafında — bu sandbox S3'e erişemiyor):** `scripts/check_maxar_sehir_tiles.py` ile bu 36 çiftten birkaçını kendi makinende indirip gözle kontrol et — gerçekten görünür bina yıkımı var mı doğrula. Örnek: `python scripts/check_maxar_sehir_tiles.py --sehir Antakya --n 2`
 
 **Ön değerlendirme:** Eğer görsel kontrol de doğrularsa, Maxar artık "işe yaramaz" değil — **en güçlü aday** haline geliyor (koordinatlı, etiketsiz, gerçek şehir merkezi, düşük bulut, deprem sonrası erken tarihli).
+
+### Güncelleme — önizleme script'inde merkez-kırpma hatası bulundu (2026-10-03)
+
+İlk görsel kontrol turunda (`check_maxar_sehir_tiles.py` v1, sabit geometrik merkez kırpma) Antakya'nın 2 çiftinden 4 önizlemeden 2'si tamamen/büyük ölçüde siyah çıktı:
+
+| Dosya | Sonuç |
+|---|---|
+| `Antakya_031133023301_pre_preview.png` | **Dolu** — yoğun kentsel/endüstriyel doku, gerçek bina yapıları görünüyor |
+| `Antakya_031133023301_post_preview.png` | Boş/nodata (siyah) |
+| `Antakya_031133023231_pre_preview.png` | Boş/nodata (siyah) |
+| `Antakya_031133023231_post_preview.png` | ~%70 siyah, altta dar bir şerit halinde gerçek görüntü |
+
+**Kök neden:** Maxar ARD karoları sabit bir grid hücresi, ama hücre içindeki gerçek uydu görüntüsü (swath) dikdörtgen değil — çekim açısına (`view:azimuth`) bağlı olarak çapraz/üçgen bir şerit halinde oturuyor. Karonun geometrik merkezi bu şeridin İÇİNDE olmak zorunda değil; pre ve post çekimleri birbirinden bağımsız açılarla çekildiği için biri dolu biri boş çıkabiliyor. Bu, veri setinin veya seçilen şehir merkezi adaylarının kalitesizliğinden değil, önizleme script'inin saf (geometrik merkez) varsayımından kaynaklanan bir ölçüm hatasıydı — veri kaynağının kendisiyle ilgisi yok.
+
+**Pozitif bulgu:** `301_pre` önizlemesi gerçek, yoğun kentsel içerik gösteriyor — bu da 36 çiftlik şehir-merkezi listesinin (CSV) doğru AOI'leri bulduğunu doğruluyor. Sorun kırpma yöntemindeydi, kataloğun kendisinde değil.
+
+**Düzeltme:** `scripts/check_maxar_sehir_tiles.py` v2'ye yükseltildi — `find_data_center()` fonksiyonu önce düşük çözünürlüklü (512x512) bir probe okuyor, siyah olmayan piksellerin ağırlık merkezini buluyor, kırpmayı oradan yapıyor. Her kayıt artık `nonblack_pct` (dolu alan yüzdesi) diagnostiğini basıyor, böylece görsel kontrol yapmadan önce hangi çiftlerin boşa çıkacağı script çıktısından anlaşılabiliyor.
+
+**Durum:** v2 script kullanıcıya teslim edildi, çalıştırılması ve sonuçların (özellikle gerçek bina yıkımı görünüp görünmediği) bildirilmesi bekleniyor. Nihai Maxar kararı bu sonuçlara bağlı — henüz hiçbir çiftte hem dolu hem de görünür hasarlı bir POST görüntü doğrulanmadı.
 
 ---
 
