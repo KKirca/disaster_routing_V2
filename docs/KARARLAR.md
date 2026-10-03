@@ -24,3 +24,11 @@ Format V1'deki (`disaster-routing/docs/Kararlar.md`) ile aynı: her karar numara
 1. Denetimsiz CVA (embedding farkı, sabit eşik yok, duyarlılık analiziyle raporlama).
 2. Küçük manuel kalibrasyon seti (V1 Faz2c tarzı, ~100 örnek).
 **Sonraki adım:** V2-Faz3 başlamadan bu karar verilecek, buraya V2-K03 güncellemesi olarak eklenecek.
+
+## V2-K04 — Maxar çift seçim kriteri: hem pre HEM post eşiği geçmeli
+
+**Tarih:** 2026-10-03
+**Karar:** Bir Maxar pre/post çifti yalnızca HER İKİ taraf da (pre ve post ayrı ayrı) dolu-alan eşiğini (varsayılan %95, bkz. `scripts/maxar_filter_temiz.py`) geçerse kullanılabilir listesine giriyor. Tek tarafı temiz diğeri değilse çift tamamen elenir — kısmi/tek-taraflı kullanım yok.
+**Gerekçe:** Kullanıcı tercihi, görsel doğrulamadan sonra netleşti. Antakya `031133023301` çifti örneği: pre=%100 ama post=%79 — pre tek başına kusursuz olsa da post'un eksik alanı değişim-tespiti (change detection) sinyalini bozar, bu yüzden çift bütün olarak elenir.
+**Ölçüm notu:** Bu eşik, `check_maxar_sehir_tiles.py`'nin bastığı "dolu alan %" ile AYNI metrik değil — o script SEÇİLEN 2048x2048 kırpma penceresini ölçer, `maxar_filter_temiz.py` TÜM karoyu ölçer (ayrıntı: script docstring'i). Filtreleme kararı tüm karo üzerinden veriliyor.
+**Sonraki adım:** `maxar_filter_temiz.py` 36 adayın tamamında çalıştırılacak, geçen alt küme `docs/maxar_temiz_ciftler.csv`'ye yazılacak, bu dosya Maxar'ın nihai kullanılabilir veri kümesi olacak.

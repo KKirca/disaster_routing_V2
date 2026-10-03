@@ -60,6 +60,14 @@ Her aday veri seti için: görsel kalitesi, etiket kalitesi, bina/hasar içeriğ
 
 **Durum:** v2 script kullanıcıya teslim edildi, çalıştırılması ve sonuçların (özellikle gerçek bina yıkımı görünüp görünmediği) bildirilmesi bekleniyor. Nihai Maxar kararı bu sonuçlara bağlı — henüz hiçbir çiftte hem dolu hem de görünür hasarlı bir POST görüntü doğrulanmadı.
 
+### Güncelleme — görsel doğrulama sonucu ve seçim kriteri (2026-10-03)
+
+Antakya `031133023301` ve `031133023231` çiftleri gözle kontrol edildi, görsel kalitesi yeterli bulundu. Ancak `301` çiftinde pre=%100 dolu, post=%79 dolu — tek taraf tam temiz değil. **Karar (V2-K04, `docs/KARARLAR.md`):** bir çift yalnızca hem pre HEM post ayrı ayrı dolu-alan eşiğini (varsayılan %95) geçerse kullanılır; tek taraflı temizlik yeterli değil.
+
+Bu kriteri 36 adayın TAMAMINA uygulamak için `scripts/maxar_filter_temiz.py` yazıldı — her kaydı tam indirmeden (GDAL `/vsicurl/` ile sadece düşük-çözünürlüklü bir probe okuyarak) pre/post dolu-alan yüzdesini ölçüyor ve eşiği geçen alt kümeyi `docs/maxar_temiz_ciftler.csv`'ye yazıyor.
+
+**Kalan adım (kullanıcı tarafında):** `python scripts/maxar_filter_temiz.py --esik 95` çalıştırılacak, çıkan `docs/maxar_temiz_ciftler.csv` bu dosyaya eklenecek ve kaç/which çiftin gerçekten kullanılabilir olduğu kesinleşecek.
+
 ---
 
 ## 2. KATE-CD
