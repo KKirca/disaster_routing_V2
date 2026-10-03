@@ -61,7 +61,7 @@ def nonblack_pct_whole(url: str, probe_size: int = 512) -> float:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--esik", type=float, default=95.0,
+    ap.add_argument("--esik", type=float, default=90.0,
                      help="Hem pre hem post'un gecmesi gereken min. dolu-alan yuzdesi")
     args = ap.parse_args()
 
